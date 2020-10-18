@@ -1,0 +1,18 @@
+# -----------------------------------------------------------------------------
+# ----------------------------         TRAINING          ----------------------
+# -----------------------------------------------------------------------------
+main.solved_score = 190
+
+
+# -----------------------------------------------------------------------------
+# ------------------------------    ENVIRONMENT    ----------------------------
+# -----------------------------------------------------------------------------
+# choice: 'CartPole-v0', 'HalfCheetah-v2', 'InvertedPendulum-v2', 'PongNoFrameskip-v4'
+create_environment.name = 'CartPole-v0'
+create_environment.gym_make_kwargs = {}
+create_environment.save_videos = False
+create_environment.wrapper_kwargs = {
+    "directory": "./videos/",
+    "force": True,
+    "write_upon_reset": True
+}
