@@ -175,6 +175,8 @@ def create_environment(name, gym_make_kwargs=dict(), save_videos=False, wrapper_
         env = wrap_cart_pole_environment(env)
     elif name.startswith("Pong"):
         env = wrap_pong_environment(env)
+    elif name.startswith("HalfCheetah"):
+        env = wrap_half_cheetah_environment(env)
     else:
         raise NotImplementedError(f"{name} environment is not currently supported.")
 
@@ -186,6 +188,10 @@ def create_environment(name, gym_make_kwargs=dict(), save_videos=False, wrapper_
 def wrap_cart_pole_environment(env):
     # env = wrappers.TimeLimit(env.unwrapped, max_episode_steps=1000)
     # env = CartPoleRewardModifier(env)
+    return env
+
+
+def wrap_half_cheetah_environment(env):
     return env
 
 
