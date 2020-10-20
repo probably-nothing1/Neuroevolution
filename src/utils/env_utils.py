@@ -5,6 +5,7 @@ import cv2
 import gin
 import gym
 import numpy as np
+import pybullet_envs
 from gym import wrappers
 
 
@@ -175,8 +176,32 @@ def create_environment(name, gym_make_kwargs=dict(), save_videos=False, wrapper_
         env = wrap_cart_pole_environment(env)
     elif name.startswith("Pong"):
         env = wrap_pong_environment(env)
+    elif name.startswith("InvertedPendulum"):
+        pass
+    elif name.startswith("InvertedDoublePendulum"):
+        pass
+    elif name.startswith("Walker2d"):
+        pass
+    elif name.startswith("Ant"):
+        pass
+    elif name.startswith("Hopper"):
+        pass
+    elif name.startswith("Humanoid"):
+        pass
+    elif name.startswith("HumanoidStandup"):
+        pass
+    elif name.startswith("Thrower"):
+        pass
+    elif name.startswith("Pusher"):
+        pass
+    elif name.startswith("Reacher"):
+        pass
+    elif name.startswith("Striker"):
+        pass
+    elif name.startswith("Swimmer"):
+        pass
     elif name.startswith("HalfCheetah"):
-        env = wrap_half_cheetah_environment(env)
+        pass
     else:
         raise NotImplementedError(f"{name} environment is not currently supported.")
 

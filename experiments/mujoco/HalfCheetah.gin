@@ -1,0 +1,20 @@
+# -----------------------------------------------------------------------------
+# ----------------------------         TRAINING          ----------------------
+# -----------------------------------------------------------------------------
+train.solved_score = 4800
+train.num_proc = 1
+get_top_performers.top_count = 10
+create_population.population_size = 100
+mutate.noise_std = 0.01
+
+# -----------------------------------------------------------------------------
+# ------------------------------    ENVIRONMENT    ----------------------------
+# -----------------------------------------------------------------------------
+create_environment.name = 'HalfCheetah-v3'
+create_environment.gym_make_kwargs = {}
+create_environment.save_videos = False
+create_environment.wrapper_kwargs = {
+    "directory": "./videos/",
+    "force": True,
+    "write_upon_reset": True
+}
