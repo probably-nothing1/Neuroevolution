@@ -2,9 +2,9 @@
 # ----------------------------         TRAINING          ----------------------
 # -----------------------------------------------------------------------------
 train.solved_score = 0
-train.num_proc = 1
-get_top_performers.top_count = 10
-create_population.population_size = 100
+train.num_proc = 6
+train.elite_size = 10
+train.population_size = 100
 mutate.noise_std = 0.01
 
 # -----------------------------------------------------------------------------
