@@ -1,3 +1,4 @@
+import random
 from itertools import chain
 
 import numpy as np
@@ -15,3 +16,7 @@ def flatten(list_of_lists):
 
 def unzip(list_of_pairs):
     return zip(*list_of_pairs)
+
+
+def randint_generator(size):
+    return (random.randint(0, 2 ** 32 - 1) for _ in range(size))

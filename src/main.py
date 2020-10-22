@@ -40,8 +40,7 @@ def create_noise_tensor(model):
     return [torch.normal(mean=0, std=1, size=p.data.size()) for p in model.parameters()]
 
 
-@gin.configurable
-def create_population(env, population_size=50, top_models=None):
+def create_population(env, population_size, top_models=None):
     if top_models:
         return [mutate(random.choice(top_models)) for _ in range(population_size)]
     return [create_model(env) for _ in range(population_size)]
@@ -55,7 +54,6 @@ def sort_population(evaluated_population):
     evaluated_population.sort(key=lambda model: model[1], reverse=True)
 
 
-@gin.configurable
 def get_top_performers(evaluated_population, top_count):
     sort_population(evaluated_population)
     top_models, top_scores = unzip(evaluated_population[:top_count])
@@ -63,15 +61,15 @@ def get_top_performers(evaluated_population, top_count):
 
 
 @gin.configurable
-def train(solved_score, num_proc):
+def train(solved_score, population_size, elite_size, num_proc):
     env = create_environment()
-    population = create_population(env)
+    population = create_population(env, population_size)
 
     ma_reward = 0
     for epoch in range(1000):
         start_time = time.time()
         evaluated_population = evaluate_population(population, env)
-        top_models, top_scores = get_top_performers(evaluated_population)
+        top_models, top_scores = get_top_performers(evaluated_population, elite_size)
 
         # wandb.log({"Max Reward": top_scores.max(), "Mean Reward": top_scores.mean(), "Std Reward": top_scores.std()})
         ma_reward = 0.5 * ma_reward + 0.5 * top_scores.mean()
@@ -79,7 +77,7 @@ def train(solved_score, num_proc):
             print(f"Solved in {epoch} epochs")
             break
 
-        population = create_population(env, top_models=top_models)
+        population = create_population(env, population_size, top_models=top_models)
         epoch_time = time.time() - start_time
         # wandb.log(
         #     {"Epoch": epoch, "Rolling Mean Reward": ma_reward, "Epoch Time": epoch_tiem}
