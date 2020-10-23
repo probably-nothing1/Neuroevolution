@@ -1,18 +1,18 @@
 import copy
 import sys
 import time
-from collections import namedtuple
 from itertools import count
 from random import randint
 
 import gin
+import gym
 import numpy as np
 import torch
 import torch.multiprocessing as mp
 import wandb
 
 from model import create_model
-from utils.env_utils import create_environment
+from utils.env_utils import create_environment, get_video_filepath
 from utils.multiprocessing_utils import (
     EMPTY_MESSAGE,
     KILL_MESSAGE,
@@ -23,7 +23,21 @@ from utils.multiprocessing_utils import (
     spawn_processes,
 )
 from utils.pytorch_utils import create_noise_tensors
-from utils.utils import randint_generator, set_seed, unzip
+from utils.utils import randint_generator, setup_logger, unzip
+
+
+def record_evaluation_video(top_agent, env):
+    is_recording = isinstance(env, gym.wrappers.Monitor)
+    if is_recording:
+        env._set_mode("evaluation")
+
+    evaluate(top_agent, env)
+
+    if is_recording:
+        env._set_mode("training")
+        env.reset()
+        video_filepath = get_video_filepath(env)
+        wandb.log({"Evaluate Video": wandb.Video(video_filepath)}, commit=False)
 
 
 def evaluate(model, env):
@@ -49,7 +63,7 @@ def mutate(model, noise_std, seed):
 
 
 def mutate_and_evaluate_task(elite, work_queue, results_queue):
-    env = create_environment()
+    env = create_environment(save_videos=False)
     while True:
         work_item = work_queue.get()
         model_id, seed, message = work_item
@@ -88,17 +102,19 @@ def get_top_performers(evaluated_population, elite, elite_size):
     return np.array(top_scores)
 
 
-def log_generation_stats(generation, scores, time):
+def log_generation_stats(generation, scores, time, commit=True):
     print(f"{generation}. {scores.mean():.2f} +-{scores.std():.2f}. t={time:.2f} seconds.")
-    # wandb.log(
-    #     {
-    #         "Generation": generation,
-    #         "Generation Time": elapsed_time,
-    #         "Max Reward": scores.max(),
-    #         "Mean Reward": scores.mean(),
-    #         "Std Reward": scores.std(),
-    #     }
-    # )
+    wandb.log(
+        {
+            "Generation": generation,
+            "Elapsed Time": time,
+            "Max Reward": scores.max(),
+            "Mean Reward": scores.mean(),
+            "Std Reward": scores.std(),
+            "Min Reward": scores.min(),
+        },
+        commit=commit,
+    )
 
 
 def create_population(env, population_size):
@@ -115,7 +131,8 @@ def get_top_performers_from_random_population(env, population, elite_size):
 
 
 @gin.configurable
-def train(solved_score, population_size, elite_size, num_proc):
+def train(solved_score, population_size, elite_size, num_proc, log_video_rate):
+    setup_logger()
     manager = mp.Manager()
     work_queue = manager.Queue()
     results_queue = manager.Queue()
@@ -124,6 +141,7 @@ def train(solved_score, population_size, elite_size, num_proc):
     start_time = time.time()
     env = create_environment()
     population = create_population(env, population_size)
+    print(population[0])
     elite, top_scores = get_top_performers_from_random_population(env, population, elite_size)
     elapsed_time = time.time() - start_time
     log_generation_stats(1, top_scores, elapsed_time)
@@ -138,9 +156,11 @@ def train(solved_score, population_size, elite_size, num_proc):
         evaluated_population = collect_results(results_queue, size=population_size)
         top_scores = get_top_performers(evaluated_population, elite, elite_size)
         elapsed_time = time.time() - start_time
+        if generation % log_video_rate == 0:
+            record_evaluation_video(elite[0], env)
         log_generation_stats(generation, top_scores, elapsed_time)
 
-        ma_reward = 0.9 * ma_reward + 0.1 * top_scores.mean()
+        ma_reward = 0.7 * ma_reward + 0.3 * top_scores.mean()
         if ma_reward >= solved_score:
             print(f"Solved in {generation} generations")
             kill_processes(work_queue, num_proc)
