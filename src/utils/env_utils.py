@@ -5,7 +5,6 @@ import cv2
 import gin
 import gym
 import numpy as np
-import pybullet_envs
 from gym import wrappers
 
 
@@ -186,7 +185,7 @@ def create_environment(name, gym_make_kwargs=dict(), save_videos=False, wrapper_
         pass
     elif name.startswith("Hopper"):
         pass
-    elif name.startswith("Humanoid"):
+    elif name.startswith("Humanoid-"):
         pass
     elif name.startswith("HumanoidStandup"):
         pass
@@ -213,10 +212,6 @@ def create_environment(name, gym_make_kwargs=dict(), save_videos=False, wrapper_
 def wrap_cart_pole_environment(env):
     # env = wrappers.TimeLimit(env.unwrapped, max_episode_steps=1000)
     # env = CartPoleRewardModifier(env)
-    return env
-
-
-def wrap_half_cheetah_environment(env):
     return env
 
 
