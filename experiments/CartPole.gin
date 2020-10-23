@@ -10,12 +10,22 @@ mutate.noise_std = 0.01
 # -----------------------------------------------------------------------------
 # ------------------------------    ENVIRONMENT    ----------------------------
 # -----------------------------------------------------------------------------
-# choice: 'CartPole-v0', 'HalfCheetah-v2', 'InvertedPendulum-v2', 'PongNoFrameskip-v4'
 create_environment.name = 'CartPole-v0'
 create_environment.gym_make_kwargs = {}
-create_environment.save_videos = False
+create_environment.save_videos = True
 create_environment.wrapper_kwargs = {
     "directory": "./videos/",
     "force": True,
     "write_upon_reset": True
 }
+
+# -----------------------------------------------------------------------------
+# ----------------------------        LOGGING        --------------------------
+# -----------------------------------------------------------------------------
+setup_logger.name = "CartPole"
+setup_logger.notes = ""
+setup_logger.project = "Genetic-Algorithms"
+setup_logger.tags = ['GA', 'CartPole-v0']
+setup_logger.save_code = True
+setup_logger.monitor_gym = False
+train.log_video_rate = 20
